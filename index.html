@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carlos Mavros - Interactive Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #002b36;
+            color: green;
+            font-family: 'Roboto Mono', monospace;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        #menu {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .menu-item {
+            background-color: #073642;
+            color: green;
+            padding: 5px 10px;
+            border: 1px solid #444;
+            cursor: pointer;
+            font-size: 1em;
+            font-family: 'Roboto Mono', monospace;
+        }
+        #terminal-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        #terminal {
+            background-color: black;
+            color: green;
+            width: 80%;
+            max-width: 800px;
+            padding: 20px;
+            border: 2px solid #444;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-height: 600px;
+        }
+        #output {
+            flex-grow: 1;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 1em;
+        }
+        #input {
+            display: flex;
+            align-items: center;
+            font-size: 1em;
+        }
+        #input span {
+            margin-right: 10px;
+        }
+        #input input {
+            flex-grow: 1;
+            background: black;
+            color: green;
+            border: none;
+            outline: none;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1em;
+        }
+        pre, div {
+            font-size: 1em;
+        }
+        .command-output {
+            font-size: 1em;
+        }
+        .persistent-help {
+            font-size: 1em;
+        }
+        a {
+            color: green;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <div class="menu-item" onclick="executeCommand('/help')">Help</div>
+        <div class="menu-item" onclick="executeCommand('/about')">About</div>
+        <div class="menu-item" onclick="executeCommand('/contact')">Contact</div>
+        <div class="menu-item" onclick="executeCommand('/projects')">Projects</div>
+        <div class="menu-item" onclick="executeCommand('/cv')">CV</div>
+    </div>
+    <div id="terminal-container">
+        <div id="terminal">
+            <div class="persistent-help">💡 Use /help to see available commands</div>
+            <div id="output"></div>
+            <div id="input">
+                <span>$</span>
+                <input type="text" id="command" autofocus autocomplete="off">
+            </div>
+        </div>
+    </div>
+    <script>
+        const outputElement = document.getElementById('output');
+        const inputElement = document.getElementById('command');
+
+        const commands = [
+            '/help',
+            '/about',
+            '/contact',
+            '/projects',
+            '/cv'
+        ];
+
+        const aboutText = `<br>Hi there! I'm Carlos, a passionate learner and tech enthusiast. My formal studies are in Applied Mathematics (I did a whole lot of Analysis, a fair amount of Physics and then majored in Statistics and Computer Science). I graduated in 2022 from the National Technical University of Athens and since then I have worked as a Data Scientist/Data Engineer, as a Software Developer and I'm currenly working in Product Development.<br><br>Altough my day job is not a hands-on tech job, building things has always been my passion and I actively do that on the side. Currently (as of May 2026) I am interested in RAG (Retrieval Augmented Generation) and all the advances that have driven AI and LLMs to the mainstream in the past couple of years.<br><br>Check out my /projects section for more.`;
+        const contactText = `<br>Email: <a href="mailto:carlos@cmavros.com">carlos@cmavros.com</a><br>LinkedIn: <a href="https://www.linkedin.com/in/carlosmavros" target="_blank">https://www.linkedin.com/in/carlosmavros</a>`;
+        const projectsText = `<br>Coming Soon!`;
+        const cvLink = `<br>You can view my CV here: <a href="carlos_mavros_cv.pdf" target="_blank">CV Link</a>`;
+
+        const helpTextPersistent = `💡 Use /help to see available commands`;
+        const helpTextCommand = `<br>Available commands:
+- /help: Show this help message
+- /about: Show the About section
+- /contact: Show contact details
+- /projects: Show projects
+- /cv: Get a link to my CV`;
+
+        const greetingText = `Hi! I'm Carlos - Welcome to my Cyber Space`;
+
+        let commandHistory = [];
+        let historyIndex = -1;
+
+        function printToOutput(text, isError = false) {
+            const outputHTML = `<div class="command-output">${text}</div>`;
+            if (!isError) {
+                outputElement.innerHTML = outputHTML;
+            } else {
+                outputElement.innerHTML = outputHTML;
+            }
+            outputElement.scrollTop = outputElement.scrollHeight;
+        }
+
+        function handleCommand(command) {
+            let outputText = '';
+            switch (command.trim()) {
+                case '/help':
+                    outputText = helpTextCommand;
+                    break;
+                case '/about':
+                    outputText = aboutText;
+                    break;
+                case '/contact':
+                    outputText = contactText;
+                    break;
+                case '/projects':
+                    outputText = projectsText;
+                    break;
+                case '/cv':
+                    outputText = cvLink;
+                    break;
+                default:
+                    outputText = `Error: Unknown command "${command}". Did you mean "Abracadabra"? Just kidding! Here are the available commands:
+${helpTextCommand}`;
+                    printToOutput(outputText, true);
+                    return;
+            }
+            printToOutput(outputText);
+            commandHistory.push(command);
+            historyIndex = commandHistory.length;
+        }
+
+        function executeCommand(command) {
+            inputElement.value = command;
+            handleCommand(command);
+            inputElement.value = '';
+        }
+
+        inputElement.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const command = inputElement.value;
+                handleCommand(command);
+                inputElement.value = '';
+            } else if (event.key === 'ArrowUp') {
+                if (historyIndex > 0) {
+                    historyIndex -= 1;
+                    inputElement.value = commandHistory[historyIndex];
+                }
+            } else if (event.key === 'ArrowDown') {
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex += 1;
+                    inputElement.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    inputElement.value = '';
+                }
+            } else if (event.key === 'Tab') {
+                event.preventDefault();
+                const inputValue = inputElement.value;
+                const matchingCommands = commands.filter(cmd => cmd.startsWith(inputValue));
+                if (matchingCommands.length === 1) {
+                    inputElement.value = matchingCommands[0];
+                }
+            }
+        });
+
+        // Print the initial greeting and persistent help
+        const initialOutput = `
+            <div class="command-output">${greetingText}</div>
+        `;
+        outputElement.innerHTML = initialOutput;
+    </script>
+</body>
+</html>
+
