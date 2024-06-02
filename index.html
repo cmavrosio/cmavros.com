@@ -134,6 +134,32 @@
 - /projects: Show projects
 - /cv: Get a link to my CV`;
 
+        const notesText = `<br># Write your MySQL query statement below<br>
+SELECT <br>
+    product_id<br>
+    ,price<br>
+FROM (<br>
+    select<br>
+        ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY change_date DESC) as rn<br>
+        ,p.product_id<br>
+        ,p.new_price as price<br>
+    from Products p<br>
+    where change_date <= DATE('2019-08-16')<br>
+) as x WHERE x.rn=1<br>
+UNION<br>
+SELECT <br>
+    x.product_id<br>
+    ,10 as price<br>
+FROM (<br>
+        SELECT<br>
+            p.product_id<br>
+            FROM Products p<br>
+            GROUP BY product_id HAVING min(p.change_date) > DATE('2019-08-16')<br>
+) as x;<br><br>
+If you understand this query - you are OK with SQL. Move on.
+FYI the question was: get all prices at a specific date. Products table has columns (product_id, new_price, change_date),
+and assume price of 10 [essentially at t=0, which is obviously not in the table]`;
+
         const greetingText = `Hi! I'm Carlos - Welcome to my Cyber Space`;
 
         let commandHistory = [];
@@ -166,6 +192,9 @@
                     break;
                 case '/cv':
                     outputText = cvLink;
+                    break;
+                case '/notes':
+                    outputText = notesText;
                     break;
                 default:
                     outputText = `Error: Unknown command "${command}". Did you mean "Abracadabra"? Just kidding! Here are the available commands:
